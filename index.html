@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Pengimbas Kaunter • Family Day SMKB 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --kayu: #5a3416;
+    --kayu-gelap: #3b2110;
+    --kayu-cerah: #8a5a2b;
+    --padi: #f2c14e;
+    --padi-gelap: #d99a1e;
+    --daun: #2f6b3a;
+    --daun-gelap: #1e4a27;
+    --kraf: #f7ecd4;
+    --kraf-gelap: #ead6ad;
+    --senja: #e2683c;
+    --merah: #b8322a;
+    --emas: #ffd34d;
+    --teks: #2b1a0c;
+    --bayang: 0 6px 0 rgba(59, 33, 16, .35);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; }
+  body {
+    font-family: 'Nunito', system-ui, sans-serif;
+    color: var(--teks);
+    background-color: var(--kraf);
+  }
+  .tajuk { font-family: 'Lilita One', 'Arial Black', sans-serif; letter-spacing: .5px; font-weight: 400; }
+  .corak {
+    background-image: radial-gradient(circle at 10px 10px, rgba(90, 52, 22, .09) 2px, transparent 3px);
+    background-size: 22px 22px;
+  }
+  /* Papan kayu */
+  .papan {
+    background:
+      repeating-linear-gradient(0deg, rgba(0,0,0,.07) 0 2px, transparent 2px 24px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0 1px, transparent 1px 7px),
+      linear-gradient(180deg, var(--kayu-cerah), var(--kayu));
+    color: var(--kraf);
+    border-radius: 16px;
+    box-shadow: var(--bayang), inset 0 0 0 3px rgba(255,255,255,.08);
+  }
+  /* Bunting / panji kenduri */
+  .bunting { display: flex; justify-content: center; height: 36px; overflow: hidden; position: relative; }
+  .bunting::before { content: ""; position: absolute; top: 5px; left: 0; right: 0; height: 2px; background: var(--kayu-gelap); }
+  .bunting span { flex: 0 0 34px; height: 30px; margin-top: 6px; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+  .bunting span:nth-child(4n+1) { background: var(--merah); }
+  .bunting span:nth-child(4n+2) { background: var(--padi); }
+  .bunting span:nth-child(4n+3) { background: var(--daun); }
+  .bunting span:nth-child(4n+4) { background: var(--senja); }
+  /* Butang */
+  .btn {
+    font-family: 'Lilita One', 'Arial Black', sans-serif; font-size: 20px; letter-spacing: .5px;
+    border: 0; border-radius: 14px; padding: 16px 22px; cursor: pointer;
+    box-shadow: var(--bayang); transition: transform .08s, box-shadow .08s;
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    text-decoration: none;
+  }
+  .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(59,33,16,.35); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+  .btn-padi { background: var(--padi); color: var(--kayu-gelap); }
+  .btn-daun { background: var(--daun); color: #fff; }
+  .btn-merah { background: var(--merah); color: #fff; }
+  .btn-kayu { background: var(--kayu); color: var(--padi); }
+  .hidden { display: none !important; }
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.bunting').forEach(function (b) {
+      for (var i = 0; i < 70; i++) b.appendChild(document.createElement('span'));
+    });
+  });
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+</script>
+<script>
+  /* ===== TETAPAN: tampal URL Web App (/exec) di sini (atau buka halaman ini dengan ?u=URL) ===== */
+  var API_TETAP = '';
+  /* ============================================================================================ */
+  var QS = new URLSearchParams(location.search);
+  (function () { try { if (QS.get('u')) localStorage.setItem('apiUrl', QS.get('u')); } catch (e) {} })();
+  var API_URL = API_TETAP || QS.get('u') || (function () { try { return localStorage.getItem('apiUrl') || ''; } catch (e) { return ''; } })();
+  // Pengganti google.script.run — panggil Apps Script melalui fetch
+  var google = { script: {} };
+  Object.defineProperty(google.script, 'run', { get: function () {
+    var ok = function () {}, gagal = function () {};
+    var o = { withSuccessHandler: function (f) { ok = f; return o; }, withFailureHandler: function (f) { gagal = f; return o; } };
+    ['getStesenAwal', 'getStesenData', 'imbasKod', 'tandaManual'].forEach(function (fn) {
+      o[fn] = function () {
+        var args = Array.prototype.slice.call(arguments);
+        if (!API_URL) { setTimeout(function () { gagal(new Error('URL sistem belum ditetapkan. Buka pengimbas melalui butang di halaman Semakan Stesen.')); }); return; }
+        fetch(API_URL + (API_URL.indexOf('?') > -1 ? '&' : '?') + 'api=1', {
+          method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: fn, args: args }), redirect: 'follow'
+        }).then(function (r) { return r.json(); })
+          .then(function (j) { if (j.ok) ok(j.data); else gagal(new Error(j.error)); })
+          .catch(function () { gagal(new Error('Tiada sambungan ke sistem. Semak internet.')); });
+      };
+    });
+    return o;
+  } });
+</script>
+  <script src="html5-qrcode.min.js"></script>
+  <style>
+    html, body { min-height: 100%; }
+    body { background-color: var(--kayu-gelap); color: var(--kraf); }
+    .hidden { display: none !important; }
+
+    /* Persediaan */
+    .sedia { min-height: 100vh; padding: 0 0 30px; background: var(--kraf); color: var(--teks); }
+    .sedia .papan { margin: 0 14px; padding: 20px 18px; text-align: center; }
+    .sedia .papan h1 { margin: 4px 0; font-size: 28px; color: var(--padi); }
+    .sedia main { max-width: 480px; margin: 16px auto 0; padding: 0 14px; }
+    .lbl { font: 400 18px 'Lilita One', 'Arial Black', sans-serif; color: var(--kayu); margin: 14px 0 6px; }
+    .medan { width: 100%; font: 800 18px 'Nunito', sans-serif; padding: 13px 14px; border-radius: 14px; border: 3px solid var(--kayu-cerah); background: #fffdf6; outline: none; }
+    .medan:focus { border-color: var(--daun); }
+    .pilihan { display: flex; flex-direction: column; gap: 8px; }
+    .pil { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 14px; border: 3px solid var(--kraf-gelap); background: #fffdf6;
+      font: 900 17px 'Nunito', sans-serif; color: var(--teks); cursor: pointer; text-align: left; }
+    .pil .ik { font-size: 30px; }
+    .pil small { display: block; font-weight: 800; font-size: 13px; }
+    .pil.aktif { border-color: var(--daun); background: #e6f3e6; }
+    .pil.tutup { opacity: .55; }
+    .sedia .btn { width: 100%; margin-top: 18px; font-size: 22px; padding: 18px; }
+    .ralat { color: var(--merah); font-weight: 800; min-height: 22px; margin-top: 10px; text-align: center; }
+
+    /* Pengimbas */
+    .imbas { min-height: 100vh; display: flex; flex-direction: column; }
+    .bar-atas { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--kayu); box-shadow: 0 4px 0 rgba(0,0,0,.3); }
+    .bar-atas .ik { font-size: 32px; }
+    .bar-atas .t { flex: 1; min-width: 0; }
+    .bar-atas .t b { display: block; font: 400 19px 'Lilita One', 'Arial Black', sans-serif; color: var(--padi); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-atas .t small { font-weight: 800; opacity: .85; }
+    .bar-atas .kira { text-align: center; background: rgba(0,0,0,.25); border-radius: 12px; padding: 4px 10px; }
+    .bar-atas .kira b { display: block; font: 400 24px 'Lilita One', 'Arial Black', sans-serif; color: var(--padi); line-height: 1.1; }
+    .bar-atas .kira span { font-size: 11px; font-weight: 800; }
+    .tukar { background: rgba(0,0,0,.25); color: var(--kraf); border: 0; border-radius: 10px; padding: 9px 10px; font: 800 13px 'Nunito', sans-serif; cursor: pointer; }
+
+    .kamera-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; gap: 14px; }
+    #kamera { width: min(440px, 100%); border-radius: 22px; overflow: hidden; border: 6px solid var(--padi); background: #000; min-height: 260px; }
+    #kamera video { border-radius: 14px; }
+    .arahan { font: 400 20px 'Lilita One', 'Arial Black', sans-serif; color: var(--padi); text-align: center; }
+    .arahan small { display: block; font: 700 14px 'Nunito', sans-serif; color: var(--kraf); opacity: .85; margin-top: 4px; }
+    .ralat-kam { background: #fffdf6; color: var(--teks); border-radius: 16px; padding: 16px; font-weight: 700; max-width: 440px; text-align: center; }
+    .bawah { padding: 12px 14px 22px; display: flex; gap: 10px; }
+    .bawah .btn { flex: 1; font-size: 18px; }
+
+    /* Keputusan penuh skrin */
+    .hasil { position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; animation: masuk .18s ease-out; }
+    @keyframes masuk { from { transform: scale(.92); opacity: 0; } to { transform: none; opacity: 1; } }
+    .hasil.BOLEH { background: #1f7a35; } .hasil.SUDAH { background: #b8322a; }
+    .hasil.LUAR { background: #c77d0e; } .hasil.TIDAK_SAH, .hasil.TUTUP { background: #5b4a3a; }
+    .hasil .ik { font-size: 110px; line-height: 1; }
+    .hasil .st { font: 400 clamp(34px, 9vw, 60px) 'Lilita One', 'Arial Black', sans-serif; color: #fff; margin-top: 12px; line-height: 1.05; }
+    .hasil .nm { font: 900 clamp(22px, 6vw, 36px) 'Nunito', sans-serif; color: #fff; margin-top: 16px; background: rgba(0,0,0,.2); padding: 10px 18px; border-radius: 16px; }
+    .hasil .ket { font-weight: 800; font-size: 18px; color: #fff; opacity: .92; margin-top: 14px; }
+    .hasil .ketik { position: absolute; bottom: 26px; font-weight: 800; color: #fff; opacity: .75; }
+
+    /* Cari manual */
+    .cari-lembar { position: fixed; inset: 0; z-index: 25; background: var(--kraf); color: var(--teks); display: flex; flex-direction: column; }
+    .cari-lembar .kep { display: flex; gap: 10px; padding: 12px 14px; background: var(--kayu); align-items: center; }
+    .cari-lembar .kep input { flex: 1; font: 800 17px 'Nunito', sans-serif; padding: 12px; border-radius: 12px; border: 0; outline: none; }
+    .cari-lembar .isi { flex: 1; overflow: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+    .org { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: #fffdf6; border: 2px solid var(--kraf-gelap); border-radius: 14px;
+      padding: 13px 14px; font: 900 16px 'Nunito', sans-serif; color: var(--teks); cursor: pointer; text-align: left; width: 100%; }
+    .org .chip { font-size: 12px; padding: 4px 9px; border-radius: 99px; white-space: nowrap; }
+    .org .ok { background: #dcefdc; color: var(--daun-gelap); } .org .x { background: var(--padi); color: var(--kayu-gelap); }
+    .kosong { text-align: center; padding: 26px; color: var(--kayu-cerah); font-weight: 800; }
+  </style>
+</head>
+<body>
+  <!-- PERSEDIAAN -->
+  <section id="sedia" class="sedia corak">
+    <div class="bunting"></div>
+    <div class="papan">
+      <div style="font-size:48px">📷</div>
+      <h1 class="tajuk">Pengimbas Kaunter</h1>
+      <div style="font-weight:800">Imbas QR peribadi guru 🍛</div>
+    </div>
+    <main>
+      <div class="lbl">① Nama urusetia</div>
+      <input id="nama" class="medan" placeholder="cth: Cikgu Ali" autocomplete="off">
+      <div class="lbl">② PIN</div>
+      <input id="pin" class="medan" type="password" inputmode="numeric" placeholder="PIN urusetia" autocomplete="off" onchange="semakPin()">
+      <div id="blokStesen" class="hidden">
+        <div class="lbl">③ Pilih kaunter</div>
+        <div class="pilihan" id="pilihan"></div>
+      </div>
+      <button class="btn btn-daun" id="btnMula" onclick="mula()">Semak PIN ➜</button>
+      <div class="ralat" id="ralat"></div>
+    </main>
+  </section>
+
+  <!-- PENGIMBAS -->
+  <section id="imbas" class="imbas hidden">
+    <div class="bar-atas">
+      <div class="ik" id="iIk">🍛</div>
+      <div class="t"><b id="iNama">–</b><small id="iOleh"></small></div>
+      <div class="kira"><b id="iKira">–</b><span>dah ambil</span></div>
+      <button class="tukar" onclick="tukar()">Tukar</button>
+    </div>
+    <div class="kamera-wrap">
+      <div id="kamera"></div>
+      <div id="ralatKam" class="ralat-kam hidden"></div>
+      <div class="arahan">Halakan kamera ke QR guru<small>Keputusan keluar automatik, tak perlu tekan apa-apa</small></div>
+    </div>
+    <div class="bawah">
+      <button class="btn btn-padi" onclick="bukaCari()">🔍 Cari Nama</button>
+      <a class="btn btn-kayu" id="btnSenarai" href="#">📋 Senarai</a>
+    </div>
+  </section>
+
+  <div id="cari" class="cari-lembar hidden">
+    <div class="kep">
+      <input id="cariInput" type="search" placeholder="🔍 Taip nama guru..." oninput="lukisCari()">
+      <button class="tukar" onclick="tutupCari()">Tutup</button>
+    </div>
+    <div class="isi" id="cariIsi"></div>
+  </div>
+
+  <div id="hasil" class="hasil hidden" onclick="tutupHasil()"></div>
+
+  <script>
+    var URL_WEB = API_URL;
+    var KOD_URL = QS.get('k') || '';
+    var S_URL = QS.get('s') || '';
+    var PIN = '', NAMA = '', ST = null, SENARAI_ST = [], scanner = null, kunci = false, akhirKod = '', akhirMasa = 0, timerHasil = null, AUDIO = null, CARI = [];
+    function $(id) { return document.getElementById(id); }
+    function simpan(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+    function ambil(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
+
+    $('nama').value = ambil('urusNama');
+    if (ambil('urusPin')) { $('pin').value = ambil('urusPin'); semakPin(true); }
+
+    function semakPin(auto) {
+      var pin = $('pin').value.trim();
+      if (!pin) return;
+      $('ralat').textContent = 'Menyemak…';
+      google.script.run.withSuccessHandler(function (r) {
+        PIN = pin; simpan('urusPin', pin); $('ralat').textContent = '';
+        SENARAI_ST = r.stesen.filter(function (s) { return s.mod === 'URUSETIA'; });
+        var pilih = S_URL || ambil('urusImbas');
+        if (!SENARAI_ST.some(function (s) { return s.id === pilih; })) {
+          var buka = SENARAI_ST.filter(function (s) { return s.buka; });
+          pilih = (buka[0] || SENARAI_ST[0]).id;
+        }
+        ST = SENARAI_ST.find(function (s) { return s.id === pilih; });
+        lukisPilihan();
+        $('blokStesen').classList.remove('hidden');
+        $('btnMula').textContent = '📷 Mula Imbas';
+        // Dibuka melalui kamera telefon dengan kod -> terus proses
+        if (auto && KOD_URL && $('nama').value.trim()) mula();
+      }).withFailureHandler(function (e) { $('ralat').textContent = e.message; simpan('urusPin', ''); }).getStesenAwal(pin);
+    }
+
+    function lukisPilihan() {
+      $('pilihan').innerHTML = SENARAI_ST.map(function (s) {
+        return '<button class="pil ' + (ST && s.id === ST.id ? 'aktif' : '') + (s.buka ? '' : ' tutup') + '" onclick="pilihSt(\'' + s.id + '\')">' +
+          '<span class="ik">' + s.ikon + '</span><span>' + esc(s.nama) +
+          '<small style="color:' + (s.buka ? 'var(--daun)">🟢 Dibuka' : 'var(--merah)">🔴 Ditutup (buka di halaman Semakan Stesen)') + '</small></span></button>';
+      }).join('');
+    }
+    function pilihSt(id) { ST = SENARAI_ST.find(function (s) { return s.id === id; }); lukisPilihan(); }
+
+    function mula() {
+      if (!PIN) { semakPin(); return; }
+      NAMA = $('nama').value.trim();
+      if (!NAMA) { $('ralat').textContent = 'Sila isi nama urusetia.'; return; }
+      simpan('urusNama', NAMA); simpan('urusImbas', ST.id);
+      try { AUDIO = AUDIO || new (window.AudioContext || window.webkitAudioContext)(); AUDIO.resume(); } catch (e) {}
+      $('sedia').classList.add('hidden'); $('imbas').classList.remove('hidden');
+      $('iIk').textContent = ST.ikon; $('iNama').textContent = ST.nama; $('iOleh').textContent = '👤 ' + NAMA;
+      $('iKira').textContent = ST.sudah + '/' + ST.jumlah;
+      $('btnSenarai').href = URL_WEB + '?page=stesen&s=' + ST.id;
+      if (KOD_URL) { var k = KOD_URL; KOD_URL = ''; proses(k); }
+      hidupKamera();
+    }
+
+    function tukar() {
+      matiKamera();
+      $('imbas').classList.add('hidden'); $('sedia').classList.remove('hidden');
+      semakPin();
+    }
+
+    /* ---------- Kamera ---------- */
+    function hidupKamera() {
+      $('ralatKam').classList.add('hidden');
+      if (!window.Html5Qrcode) { gagalKam(); return; }
+      if (!scanner) scanner = new Html5Qrcode('kamera');
+      scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: function (w, h) { var m = Math.floor(Math.min(w, h) * 0.75); return { width: m, height: m }; } },
+        function (teks) { proses(teks); }, function () {})
+        .catch(function () { gagalKam(); });
+    }
+    function matiKamera() { if (scanner && scanner.isScanning) scanner.stop().catch(function () {}); }
+    function gagalKam() {
+      $('kamera').classList.add('hidden');
+      $('ralatKam').classList.remove('hidden');
+      $('ralatKam').innerHTML = '📷 Kamera tidak dapat dibuka di sini.<br><br><b>Cara lain:</b> buka aplikasi <b>Kamera</b> telefon dan imbas QR guru. Halaman ini akan terbuka dan rekod automatik.<br><br>Atau tekan <b>🔍 Cari Nama</b>.' +
+        '<br><br><button class="btn btn-padi" style="width:100%" onclick="$(\'kamera\').classList.remove(\'hidden\');hidupKamera()">Cuba lagi</button>';
+    }
+
+    /* ---------- Proses imbasan ---------- */
+    function proses(kod) {
+      var kini = Date.now();
+      if (kunci || (kod === akhirKod && kini - akhirMasa < 5000)) return;
+      kunci = true; akhirKod = kod; akhirMasa = kini;
+      bunyi('tik');
+      google.script.run.withSuccessHandler(papar).withFailureHandler(function (e) {
+        papar({ status: 'TIDAK_SAH', ralat: e.message });
+      }).imbasKod(PIN, ST.id, kod, NAMA);
+    }
+
+    function papar(r) {
+      var T = {
+        BOLEH: ['✅', 'BOLEH AMBIL', 'Sila beri makanan 🍛'],
+        SUDAH: ['⛔', 'SUDAH AMBIL', 'Diambil pukul ' + (r.masa || '') + (r.oleh ? ' (' + r.oleh + ')' : '')],
+        LUAR: ['⚠️', 'TIADA DALAM SENARAI', 'Rujuk ketua urusetia'],
+        TIDAK_SAH: ['❓', 'QR TIDAK SAH', r.ralat || 'Ini bukan QR peribadi guru. Cuba Cari Nama.'],
+        TUTUP: ['🔒', 'KAUNTER DITUTUP', (r.stesen || '') + ' belum dibuka. Buka di halaman Semakan Stesen.'],
+      }[r.status];
+      $('hasil').className = 'hasil ' + r.status;
+      $('hasil').innerHTML = '<div class="ik">' + T[0] + '</div><div class="st">' + T[1] + '</div>' +
+        (r.nama ? '<div class="nm">' + esc(r.nama) + '</div>' : '') + '<div class="ket">' + esc(T[2]) + '</div>' +
+        '<div class="ketik">Ketik skrin untuk imbas seterusnya</div>';
+      if (r.kira) { ST.sudah = r.kira.sudah; ST.jumlah = r.kira.jumlah; $('iKira').textContent = r.kira.sudah + '/' + r.kira.jumlah; }
+      bunyi(r.status === 'BOLEH' ? 'ok' : 'x');
+      try { navigator.vibrate && navigator.vibrate(r.status === 'BOLEH' ? 120 : [200, 100, 200, 100, 200]); } catch (e) {}
+      clearTimeout(timerHasil);
+      timerHasil = setTimeout(tutupHasil, r.status === 'BOLEH' ? 2200 : 4500);
+    }
+    function tutupHasil() { clearTimeout(timerHasil); $('hasil').classList.add('hidden'); kunci = false; }
+
+    /* ---------- Cari manual ---------- */
+    function bukaCari() {
+      $('cari').classList.remove('hidden'); $('cariInput').value = '';
+      $('cariIsi').innerHTML = '<div class="kosong">Memuatkan…</div>';
+      google.script.run.withSuccessHandler(function (d) { CARI = d.senarai; lukisCari(); }).getStesenData(PIN, ST.id);
+    }
+    function tutupCari() { $('cari').classList.add('hidden'); }
+    function lukisCari() {
+      var q = $('cariInput').value.trim().toLowerCase();
+      var s = CARI.filter(function (g) { return !q || g.nama.toLowerCase().indexOf(q) > -1; });
+      $('cariIsi').innerHTML = s.length ? s.map(function (g) {
+        return '<button class="org" onclick="manual(\'' + g.id + '\',' + g.sudah + ')"><span>' + esc(g.nama) + '</span>' +
+          (g.sudah ? '<span class="chip ok">✅ ' + esc(g.masa) + '</span>' : '<span class="chip x">Tanda ambil</span>') + '</button>';
+      }).join('') : '<div class="kosong">Nama tidak dijumpai 🤔</div>';
+    }
+    function manual(id, sudah) {
+      var g = CARI.find(function (x) { return x.id === id; });
+      if (sudah) { tutupCari(); papar({ status: 'SUDAH', nama: g.nama, masa: g.masa }); kunci = true; return; }
+      tutupCari(); kunci = true;
+      google.script.run.withSuccessHandler(function (d) {
+        ST.sudah = d.sudah; $('iKira').textContent = d.sudah + '/' + d.jumlah;
+        papar({ status: 'BOLEH', nama: g.nama });
+      }).withFailureHandler(function (e) { papar({ status: 'TIDAK_SAH', ralat: e.message }); }).tandaManual(PIN, ST.id, id, NAMA + ' (manual)');
+    }
+
+    /* ---------- Bunyi ---------- */
+    function nada(f, m, l, j, v) {
+      if (!AUDIO) return;
+      var o = AUDIO.createOscillator(), g = AUDIO.createGain(), t = AUDIO.currentTime + m;
+      o.type = j; o.frequency.value = f;
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + l);
+      o.connect(g); g.connect(AUDIO.destination); o.start(t); o.stop(t + l + .05);
+    }
+    function bunyi(j) {
+      if (j === 'tik') nada(1200, 0, .05, 'square', .05);
+      if (j === 'ok') { nada(1046, 0, .25, 'sine', .3); nada(1568, .12, .5, 'sine', .3); }
+      if (j === 'x') { nada(220, 0, .25, 'square', .2); nada(180, .28, .35, 'square', .2); }
+    }
+  </script>
+</body>
+</html>
