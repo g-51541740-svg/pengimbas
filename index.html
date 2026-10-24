@@ -161,6 +161,10 @@
     .hasil .ik { font-size: 110px; line-height: 1; }
     .hasil .st { font: 400 clamp(34px, 9vw, 60px) 'Lilita One', 'Arial Black', sans-serif; color: #fff; margin-top: 12px; line-height: 1.05; }
     .hasil .nm { font: 900 clamp(22px, 6vw, 36px) 'Nunito', sans-serif; color: #fff; margin-top: 16px; background: rgba(0,0,0,.2); padding: 10px 18px; border-radius: 16px; }
+    .hasil .bungkus { margin-top: 16px; background: var(--padi); color: var(--kayu-gelap); font: 400 clamp(30px, 9vw, 48px) 'Lilita One', 'Arial Black', sans-serif;
+      padding: 10px 22px; border-radius: 18px; box-shadow: 0 6px 0 rgba(0,0,0,.25); animation: denyut 1s ease-in-out infinite; }
+    .hasil .bungkus small { display: block; font: 800 15px 'Nunito', sans-serif; }
+    @keyframes denyut { 50% { transform: scale(1.06); } }
     .hasil .ket { font-weight: 800; font-size: 18px; color: #fff; opacity: .92; margin-top: 14px; }
     .hasil .ketik { position: absolute; bottom: 26px; font-weight: 800; color: #fff; opacity: .75; }
 
@@ -321,20 +325,22 @@
     function papar(r) {
       var T = {
         BOLEH: ['✅', 'BOLEH AMBIL', 'Sila beri makanan 🍛'],
-        SUDAH: ['⛔', 'SUDAH AMBIL', 'Diambil pukul ' + (r.masa || '') + (r.oleh ? ' (' + r.oleh + ')' : '')],
+        SUDAH: ['⛔', 'SUDAH AMBIL', 'Diambil pukul ' + (r.masa || '') + (r.oleh ? ' (' + r.oleh + ')' : '') + (r.tambahan ? ' • ' + (1 + r.tambahan) + ' bungkus' : '')],
         LUAR: ['⚠️', 'TIADA DALAM SENARAI', 'Rujuk ketua urusetia'],
         TIDAK_SAH: ['❓', 'QR TIDAK SAH', r.ralat || 'Ini bukan QR peribadi guru. Cuba Cari Nama.'],
         TUTUP: ['🔒', 'KAUNTER DITUTUP', (r.stesen || '') + ' belum dibuka. Buka di halaman Semakan Stesen.'],
       }[r.status];
       $('hasil').className = 'hasil ' + r.status;
       $('hasil').innerHTML = '<div class="ik">' + T[0] + '</div><div class="st">' + T[1] + '</div>' +
-        (r.nama ? '<div class="nm">' + esc(r.nama) + '</div>' : '') + '<div class="ket">' + esc(T[2]) + '</div>' +
+        (r.nama ? '<div class="nm">' + esc(r.nama) + '</div>' : '') +
+        (r.status === 'BOLEH' && r.tambahan ? '<div class="bungkus">🍱 BERI ' + (1 + r.tambahan) + ' BUNGKUS<small>1 + ' + r.tambahan + ' tambahan keluarga</small></div>' : '') +
+        '<div class="ket">' + esc(T[2]) + '</div>' +
         '<div class="ketik">Ketik skrin untuk imbas seterusnya</div>';
       if (r.kira) { ST.sudah = r.kira.sudah; ST.jumlah = r.kira.jumlah; $('iKira').textContent = r.kira.sudah + '/' + r.kira.jumlah; }
       bunyi(r.status === 'BOLEH' ? 'ok' : 'x');
       try { navigator.vibrate && navigator.vibrate(r.status === 'BOLEH' ? 120 : [200, 100, 200, 100, 200]); } catch (e) {}
       clearTimeout(timerHasil);
-      timerHasil = setTimeout(tutupHasil, r.status === 'BOLEH' ? 2200 : 4500);
+      timerHasil = setTimeout(tutupHasil, r.status === 'BOLEH' ? (r.tambahan ? 4500 : 2200) : 4500);
     }
     function tutupHasil() { clearTimeout(timerHasil); $('hasil').classList.add('hidden'); kunci = false; }
 
@@ -355,11 +361,11 @@
     }
     function manual(id, sudah) {
       var g = CARI.find(function (x) { return x.id === id; });
-      if (sudah) { tutupCari(); papar({ status: 'SUDAH', nama: g.nama, masa: g.masa }); kunci = true; return; }
+      if (sudah) { tutupCari(); papar({ status: 'SUDAH', nama: g.nama, masa: g.masa, tambahan: g.tambahan }); kunci = true; return; }
       tutupCari(); kunci = true;
       google.script.run.withSuccessHandler(function (d) {
         ST.sudah = d.sudah; $('iKira').textContent = d.sudah + '/' + d.jumlah;
-        papar({ status: 'BOLEH', nama: g.nama });
+        papar({ status: 'BOLEH', nama: g.nama, tambahan: g.tambahan });
       }).withFailureHandler(function (e) { papar({ status: 'TIDAK_SAH', ralat: e.message }); }).tandaManual(PIN, ST.id, id, NAMA + ' (manual)');
     }
 
